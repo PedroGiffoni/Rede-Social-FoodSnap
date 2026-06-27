@@ -1,0 +1,363 @@
+// Gerador do Prisma Client.
+// O Prisma Client é a biblioteca que o backend usa para conversar com o banco.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do banco de dados.
+// A URL real fica no arquivo .env, na variável DATABASE_URL.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tipos de usuários do FoodSnap.
+// COMMON: usuário comum.
+// INFLUENCER: usuário influenciador.
+// BUSINESS: empreendimento/restaurante.
+enum UserType {
+  COMMON
+  INFLUENCER
+  BUSINESS
+}
+
+// Tipos de postagem.
+// REVIEW: avaliação feita por usuário comum ou influenciador.
+// PROMOTION: promoção feita por empreendimento.
+// ADVERTISEMENT: divulgação feita por empreendimento.
+enum PostType {
+  REVIEW
+  PROMOTION
+  ADVERTISEMENT
+}
+
+// Tipos de mídia permitidos nas postagens.
+// PHOTO: imagem.
+// VIDEO: vídeo de até 2 minutos.
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+// Tipos de desconto para cupons.
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+  FREE_ITEM
+}
+
+// Tipos de notificação do FoodSnap.
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  SAVE_BUSINESS
+}
+
+// Tabela de usuários.
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  city         String?
+  userType     UserType @default(COMMON)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  businessFollows BusinessFollow[]
+  businessProfile BusinessProfile?
+  posts            Post[]
+  businessReviews  BusinessReview[]
+  comments         Comment[]
+  likes            Like[]
+  notificationsReceived Notification[] @relation("notificationsReceived")
+  notificationsSent     Notification[] @relation("notificationsSent")
+
+  following       Follow[] @relation("following")
+  followers       Follow[] @relation("followers")
+  savedPosts      SavedPost[]
+  savedBusinesses SavedBusiness[]
+
+  @@map("users")
+}
+
+// Tabela dos empreendimentos/restaurantes.
+model BusinessProfile {
+  id String @id @default(uuid())
+
+  // Opcional porque um restaurante pode ser criado automaticamente
+  // quando um usuário comum ou influenciador faz uma avaliação.
+  userId String? @unique
+
+  categoryId   String?
+  businessName String
+  description  String?
+  address      String?
+  city         String?
+  phone        String?
+  website      String?
+  openingHours String?
+  
+  avatarUrl String?
+  coverUrl  String?
+  
+  // Indica se o dono real já reivindicou esse perfil.
+  isClaimed Boolean @default(false)
+
+  // Guarda o usuário que reivindicou o empreendimento.
+  claimedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user            User?            @relation(fields: [userId], references: [id])
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  posts           Post[]
+  businessReviews BusinessReview[]
+  coupons         Coupon[]
+  savedBy         SavedBusiness[]
+  notifications Notification[]
+  followers BusinessFollow[]
+  @@map("business_profiles")
+}
+
+// Categorias gastronômicas.
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessProfiles BusinessProfile[]
+  posts            Post[]
+
+  @@map("categories")
+}
+
+// Postagens do feed.
+model Post {
+  id String @id @default(uuid())
+
+  // Usuário que criou a postagem.
+  authorId String
+
+  // Restaurante relacionado à postagem.
+  businessProfileId String?
+
+  // Categoria gastronômica.
+  categoryId String?
+
+  // REVIEW, PROMOTION ou ADVERTISEMENT.
+  postType PostType
+
+  title       String
+  description String
+
+  // Notas da avaliação gastronômica.
+  // Usadas em postagens REVIEW.
+  // Valores esperados: 1.0 até 5.0.
+  recommendationRating Decimal? @db.Decimal(2, 1)
+  priceRating          Decimal? @db.Decimal(2, 1)
+  flavorRating         Decimal? @db.Decimal(2, 1)
+  presentationRating   Decimal? @db.Decimal(2, 1)
+
+  // Média calculada no backend.
+  averageRating Decimal? @db.Decimal(2, 1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author          User             @relation(fields: [authorId], references: [id])
+  businessProfile BusinessProfile? @relation(fields: [businessProfileId], references: [id])
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  medias          PostMedia[]
+  comments        Comment[]
+  likes           Like[]
+  savedBy         SavedPost[]
+  notifications Notification[]
+  @@map("posts")
+}
+
+// Mídias da postagem.
+// Uma postagem pode ter de 1 até 5 mídias.
+model PostMedia {
+  id String @id @default(uuid())
+
+  // Postagem dona da mídia.
+  postId String
+
+  // URL da foto ou vídeo.
+  mediaUrl String
+
+  // PHOTO ou VIDEO.
+  mediaType MediaType
+
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_medias")
+}
+
+// Avaliação específica do estabelecimento.
+model BusinessReview {
+  id                String   @id @default(uuid())
+  userId            String
+  businessProfileId String
+  locationRating    Decimal  @db.Decimal(2, 1)
+  parkingRating     Decimal  @db.Decimal(2, 1)
+  serviceRating     Decimal  @db.Decimal(2, 1)
+  environmentRating Decimal  @db.Decimal(2, 1)
+  comment           String?
+  averageRating     Decimal  @db.Decimal(2, 1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id])
+  businessProfile BusinessProfile @relation(fields: [businessProfileId], references: [id])
+
+  @@map("business_reviews")
+}
+
+// Comentários nas postagens.
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  notifications Notification[]
+  @@map("comments")
+}
+
+// Curtidas nas postagens.
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  // Impede que o mesmo usuário curta o mesmo post mais de uma vez.
+  @@unique([postId, userId])
+  @@map("likes")
+}
+
+// Sistema de seguidores.
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("following", fields: [followerId], references: [id])
+  following User @relation("followers", fields: [followingId], references: [id])
+
+  // Impede seguir a mesma pessoa duas vezes.
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// Cupons criados por empreendimentos.
+model Coupon {
+  id                String       @id @default(uuid())
+  businessProfileId String
+  title             String
+  description       String?
+  code              String       @unique
+  discountType      DiscountType
+  discountValue     Decimal?     @db.Decimal(6, 2)
+  validUntil        DateTime?
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  businessProfile BusinessProfile @relation(fields: [businessProfileId], references: [id])
+
+  @@map("coupons")
+}
+
+// Postagens salvas pelos usuários.
+model SavedPost {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@map("saved_posts")
+}
+
+// Restaurantes salvos pelos usuários.
+model SavedBusiness {
+  id                String   @id @default(uuid())
+  userId            String
+  businessProfileId String
+  createdAt         DateTime @default(now())
+
+  user            User            @relation(fields: [userId], references: [id])
+  businessProfile BusinessProfile @relation(fields: [businessProfileId], references: [id])
+
+  @@unique([userId, businessProfileId])
+  @@map("saved_businesses")
+}
+
+// Notificações recebidas pelos usuários.
+model Notification {
+  id String @id @default(uuid())
+
+  // Usuário que recebe a notificação.
+  recipientId String
+
+  // Usuário que realizou a ação.
+  actorId String
+
+  // Tipo da notificação: LIKE, COMMENT, FOLLOW, SAVE_BUSINESS.
+  type NotificationType
+
+  // Campos opcionais para ligar a notificação a algo específico.
+  postId String?
+  commentId String?
+  businessProfileId String?
+
+  // Controle de leitura.
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  recipient User @relation("notificationsReceived", fields: [recipientId], references: [id])
+  actor     User @relation("notificationsSent", fields: [actorId], references: [id])
+
+  post            Post?            @relation(fields: [postId], references: [id])
+  comment         Comment?         @relation(fields: [commentId], references: [id])
+  businessProfile BusinessProfile? @relation(fields: [businessProfileId], references: [id])
+
+  @@map("notifications")
+}
+
+model BusinessFollow {
+  id String @id @default(uuid())
+
+  userId String
+  businessProfileId String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  businessProfile BusinessProfile @relation(fields: [businessProfileId], references: [id])
+
+  @@unique([userId, businessProfileId])
+  @@map("business_follows")
+}
