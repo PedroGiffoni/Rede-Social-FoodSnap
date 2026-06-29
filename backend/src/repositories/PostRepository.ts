@@ -28,6 +28,8 @@ interface CreatePostData {
   priceRating?: number;
   flavorRating?: number;
   presentationRating?: number;
+  serviceRating?: number;
+  environmentRating?: number;
   averageRating?: number;
   medias: PostMediaData[];
 }
@@ -39,6 +41,8 @@ interface UpdatePostData {
   priceRating?: number;
   flavorRating?: number;
   presentationRating?: number;
+  serviceRating?: number;
+  environmentRating?: number;
   averageRating?: number;
 }
 
@@ -114,6 +118,8 @@ export class PostRepository {
         flavorRating: data.flavorRating,
         presentationRating: data.presentationRating,
         averageRating: data.averageRating,
+        serviceRating: data.serviceRating,
+        environmentRating: data.environmentRating,
         medias: {
           create: data.medias.map((media) => ({
             mediaUrl: media.mediaUrl,
@@ -474,6 +480,8 @@ export class PostRepository {
         priceRating: data.priceRating,
         flavorRating: data.flavorRating,
         presentationRating: data.presentationRating,
+        serviceRating: data.serviceRating,
+        environmentRating: data.environmentRating,
         averageRating: data.averageRating,
       },
       include: this.defaultInclude,

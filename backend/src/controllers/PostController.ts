@@ -29,6 +29,8 @@ export class PostController {
         priceRating,
         flavorRating,
         presentationRating,
+        serviceRating,
+        environmentRating,
         medias,
       } = req.body;
 
@@ -46,6 +48,8 @@ export class PostController {
         priceRating,
         flavorRating,
         presentationRating,
+        serviceRating,
+        environmentRating,
         medias,
       });
 
@@ -262,6 +266,8 @@ export class PostController {
         priceRating,
         flavorRating,
         presentationRating,
+        serviceRating,
+        environmentRating,
       } = req.body;
 
       const postService = new PostService();
@@ -275,6 +281,8 @@ export class PostController {
         priceRating,
         flavorRating,
         presentationRating,
+        serviceRating,
+        environmentRating,
       });
 
       return res.status(200).json(post);

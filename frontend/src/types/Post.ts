@@ -23,17 +23,27 @@ export interface Post {
   id: string;
   title: string;
   description: string;
+
   postType: "REVIEW" | "PROMOTION" | "ADVERTISEMENT";
+
   recommendationRating?: string | number | null;
   priceRating?: string | number | null;
   flavorRating?: string | number | null;
   presentationRating?: string | number | null;
+
+  /* NOVOS CAMPOS */
+  serviceRating?: string | number | null;
+  environmentRating?: string | number | null;
+
   averageRating?: string | number | null;
+
   createdAt: string;
 
   author: PostAuthor;
   businessProfile?: BusinessProfile | null;
+
   medias: PostMedia[];
+
   likes: unknown[];
   comments: unknown[];
 }

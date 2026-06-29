@@ -90,6 +90,16 @@ businessRoutes.patch(
 */
 businessRoutes.get("/:id/followers-count", businessController.followersCount);
 businessRoutes.get("/:id/followers", businessController.businessFollowers);
+/*
+  GET /businesses/:id/follow-status
+
+  Verifica se o usuário logado já segue o restaurante.
+*/
+businessRoutes.get(
+  "/:id/follow-status",
+  authMiddleware,
+  businessController.followStatus,
+);
 businessRoutes.get("/:id", businessController.show);
 
 /*

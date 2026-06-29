@@ -32,6 +32,8 @@ interface UpdatePostRequest {
   priceRating?: number;
   flavorRating?: number;
   presentationRating?: number;
+  serviceRating?: number;
+  environmentRating?: number;
 }
 
 interface CreatePostRequest {
@@ -46,6 +48,8 @@ interface CreatePostRequest {
   priceRating?: number;
   flavorRating?: number;
   presentationRating?: number;
+  serviceRating?: number;
+  environmentRating?: number;
   medias: PostMediaRequest[];
 }
 
@@ -91,17 +95,24 @@ export class PostService {
   }
 
   /*
-    Calcula a média das quatro notas principais.
+    Calcula a média das seis notas principais.
   */
   private calculateAverageRating(
     recommendationRating: number,
     priceRating: number,
     flavorRating: number,
     presentationRating: number,
+    serviceRating: number,
+    environmentRating: number,
   ) {
     const average =
-      (recommendationRating + priceRating + flavorRating + presentationRating) /
-      4;
+      (recommendationRating +
+        priceRating +
+        flavorRating +
+        presentationRating +
+        serviceRating +
+        environmentRating) /
+      6;
 
     return Number(average.toFixed(1));
   }
@@ -194,12 +205,16 @@ export class PostService {
       this.validateRating(data.priceRating, "preço");
       this.validateRating(data.flavorRating, "sabor");
       this.validateRating(data.presentationRating, "apresentação");
+      this.validateRating(data.serviceRating, "atendimento");
+      this.validateRating(data.environmentRating, "ambiente");
 
       averageRating = this.calculateAverageRating(
         data.recommendationRating as number,
         data.priceRating as number,
         data.flavorRating as number,
         data.presentationRating as number,
+        data.serviceRating as number,
+        data.environmentRating as number,
       );
     }
 
@@ -214,6 +229,8 @@ export class PostService {
       priceRating: data.priceRating,
       flavorRating: data.flavorRating,
       presentationRating: data.presentationRating,
+      serviceRating: data.serviceRating,
+      environmentRating: data.environmentRating,
       averageRating,
       medias: data.medias,
     });
@@ -422,12 +439,16 @@ export class PostService {
       this.validateRating(data.priceRating, "preço");
       this.validateRating(data.flavorRating, "sabor");
       this.validateRating(data.presentationRating, "apresentação");
+      this.validateRating(data.serviceRating, "atendimento");
+      this.validateRating(data.environmentRating, "ambiente");
 
       averageRating = this.calculateAverageRating(
         data.recommendationRating as number,
         data.priceRating as number,
         data.flavorRating as number,
         data.presentationRating as number,
+        data.serviceRating as number,
+        data.environmentRating as number,
       );
     }
 
@@ -438,6 +459,8 @@ export class PostService {
       priceRating: data.priceRating,
       flavorRating: data.flavorRating,
       presentationRating: data.presentationRating,
+      serviceRating: data.serviceRating,
+      environmentRating: data.environmentRating,
       averageRating,
     });
   }

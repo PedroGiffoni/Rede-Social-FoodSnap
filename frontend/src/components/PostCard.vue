@@ -86,6 +86,23 @@
             max="5"
             step="0.1"
           />
+          <label>Atendimento {{ editServiceRating }}</label>
+          <input
+            v-model.number="editServiceRating"
+            type="range"
+            min="1"
+            max="5"
+            step="0.1"
+          />
+
+          <label>Ambiente {{ editEnvironmentRating }}</label>
+          <input
+            v-model.number="editEnvironmentRating"
+            type="range"
+            min="1"
+            max="5"
+            step="0.1"
+          />
 
           <div class="edit-actions">
             <button type="submit" :disabled="savingEdit">
@@ -113,6 +130,8 @@
           <span>Preço: {{ localPost.priceRating }}</span>
           <span>Sabor: {{ localPost.flavorRating }}</span>
           <span>Apresentação: {{ localPost.presentationRating }}</span>
+          <span>Atendimento: {{ localPost.serviceRating }}</span>
+          <span>Ambiente: {{ localPost.environmentRating }}</span>
         </div>
       </template>
 
@@ -226,6 +245,8 @@ const editRecommendationRating = ref(4.5);
 const editPriceRating = ref(4.5);
 const editFlavorRating = ref(4.5);
 const editPresentationRating = ref(4.5);
+const editServiceRating = ref(4.5);
+const editEnvironmentRating = ref(4.5);
 const displayAvatarUrl = computed(() => {
   if (
     localPost.value.author.userType === "BUSINESS" &&
@@ -300,6 +321,10 @@ function openEditForm() {
   editPresentationRating.value = Number(
     localPost.value.presentationRating ?? 4.5,
   );
+  editServiceRating.value = Number(localPost.value.serviceRating ?? 4.5);
+  editEnvironmentRating.value = Number(
+    localPost.value.environmentRating ?? 4.5,
+  );
 
   editing.value = true;
 }
@@ -323,6 +348,8 @@ async function handleUpdatePost() {
       priceRating: editPriceRating.value,
       flavorRating: editFlavorRating.value,
       presentationRating: editPresentationRating.value,
+      serviceRating: editServiceRating.value,
+      environmentRating: editEnvironmentRating.value,
     });
 
     localPost.value = updatedPost;

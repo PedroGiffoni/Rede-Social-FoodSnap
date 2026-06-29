@@ -163,6 +163,8 @@ model Post {
   priceRating          Decimal? @db.Decimal(2, 1)
   flavorRating         Decimal? @db.Decimal(2, 1)
   presentationRating   Decimal? @db.Decimal(2, 1)
+  serviceRating        Decimal? @db.Decimal(2, 1)
+  environmentRating    Decimal? @db.Decimal(2, 1)
 
   // Média calculada no backend.
   averageRating Decimal? @db.Decimal(2, 1)

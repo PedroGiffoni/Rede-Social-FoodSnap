@@ -323,4 +323,30 @@ export class BusinessController {
       });
     }
   }
+  /*
+  GET /businesses/:id/follow-status
+
+  Verifica se o usuário logado já segue o restaurante.
+*/
+  async followStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const businessFollowService = new BusinessFollowService();
+
+      const result = await businessFollowService.checkIfUserFollowsBusiness(
+        req.user?.id as string,
+        id,
+      );
+
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(400).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Erro ao verificar status de seguir.",
+      });
+    }
+  }
 }

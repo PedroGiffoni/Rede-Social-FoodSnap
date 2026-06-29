@@ -17,6 +17,17 @@ export async function getPostsByUser(userId: string) {
   return response.data;
 }
 
+/*
+  Cria uma nova postagem.
+
+  Para postagens do tipo REVIEW, agora enviamos seis notas:
+  - indicaria
+  - preço
+  - sabor
+  - apresentação
+  - atendimento
+  - ambiente
+*/
 export async function createPost(data: {
   businessName?: string;
   businessProfileId?: string;
@@ -27,6 +38,8 @@ export async function createPost(data: {
   priceRating?: number;
   flavorRating?: number;
   presentationRating?: number;
+  serviceRating?: number;
+  environmentRating?: number;
   medias: {
     mediaUrl: string;
     mediaType: "PHOTO" | "VIDEO";
@@ -39,6 +52,9 @@ export async function createPost(data: {
 
 /*
   Edita uma postagem existente.
+
+  Mantemos o envio das seis notas para que a média
+  seja recalculada corretamente no backend.
 */
 export async function updatePost(
   postId: string,
@@ -49,6 +65,8 @@ export async function updatePost(
     priceRating: number;
     flavorRating: number;
     presentationRating: number;
+    serviceRating: number;
+    environmentRating: number;
   },
 ) {
   const response = await api.patch<Post>(`/posts/${postId}`, data);

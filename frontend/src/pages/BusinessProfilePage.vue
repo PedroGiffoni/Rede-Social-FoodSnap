@@ -98,36 +98,15 @@
             <span>Média</span>
           </div>
 
-          <div>
+          <button class="stat-button" @click="showCouponsModal = true">
             <strong>{{ coupons.length }}</strong>
             <span>Cupons</span>
-          </div>
+          </button>
 
           <div>
             <strong>{{ posts.length }}</strong>
             <span>Avaliações</span>
           </div>
-        </section>
-
-        <!-- Cupons ativos do restaurante -->
-        <section v-if="coupons.length" class="coupons">
-          <h2>Cupons ativos</h2>
-
-          <article
-            v-for="coupon in coupons"
-            :key="coupon.id"
-            class="coupon-card"
-          >
-            <strong>{{ coupon.title }}</strong>
-
-            <p v-if="coupon.description">
-              {{ coupon.description }}
-            </p>
-
-            <button class="coupon-code" @click="copyCouponCode(coupon.code)">
-              {{ coupon.code }}
-            </button>
-          </article>
         </section>
 
         <!-- Galeria horizontal com fotos das postagens -->
@@ -218,6 +197,41 @@
             </section>
           </div>
         </section>
+
+        <section
+          v-if="showCouponsModal"
+          class="modal-overlay"
+          @click.self="showCouponsModal = false"
+        >
+          <div class="coupons-modal">
+            <header class="modal-header">
+              <h2>Cupons disponíveis</h2>
+
+              <button @click="showCouponsModal = false">✕</button>
+            </header>
+
+            <section v-if="coupons.length === 0" class="modal-status">
+              Este restaurante ainda não possui cupons ativos.
+            </section>
+
+            <section v-else>
+              <article
+                v-for="coupon in coupons"
+                :key="coupon.id"
+                class="modal-coupon-card"
+                @click="copyCouponCode(coupon.code)"
+              >
+                <strong>{{ coupon.title }}</strong>
+
+                <p v-if="coupon.description">
+                  {{ coupon.description }}
+                </p>
+
+                <span>{{ coupon.code }}</span>
+              </article>
+            </section>
+          </div>
+        </section>
       </template>
     </main>
   </MainLayout>
@@ -250,6 +264,7 @@ import {
   getBusinessPosts,
   getBusinessFollowersCount,
   getBusinessFollowers,
+  getBusinessFollowStatus,
   toggleFollowBusiness,
 } from "../services/businessService";
 
@@ -284,6 +299,10 @@ const followersCount = ref(0);
 const showFollowersModal = ref(false);
 const loadingFollowers = ref(false);
 const businessFollowers = ref<any[]>([]);
+/*
+  Estados do popup de cupons.
+*/
+const showCouponsModal = ref(false);
 
 /*
   Calcula a média das avaliações com base nas postagens avaliadas.
@@ -330,6 +349,14 @@ async function loadBusinessPage() {
       ]);
 
     business.value = businessData;
+
+    try {
+      const followStatus = await getBusinessFollowStatus(businessId);
+
+      following.value = followStatus.following;
+    } catch {
+      following.value = false;
+    }
 
     posts.value = postsData.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -607,16 +634,38 @@ onMounted(() => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
 }
 
-.coupon-code {
+.coupons-modal {
+  width: min(560px, calc(100% - 32px));
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #26272d;
+  border-radius: 18px;
+  color: white;
+}
+
+.modal-coupon-card {
+  padding: 16px 18px;
+  border-bottom: 1px solid #3a3b41;
+  cursor: pointer;
+}
+
+.modal-coupon-card:hover {
+  background: #32333a;
+}
+
+.modal-coupon-card p {
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.modal-coupon-card span {
   display: inline-block;
-  margin-top: 8px;
-  border: none;
+  margin-top: 10px;
   background: #ff6b35;
   color: white;
   padding: 6px 12px;
   border-radius: 999px;
   font-weight: bold;
-  cursor: pointer;
 }
 
 .gallery-section {

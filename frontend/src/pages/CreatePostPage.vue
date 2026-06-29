@@ -107,6 +107,27 @@
               step="0.1"
             />
           </div>
+          <div class="field">
+            <label>Atendimento {{ serviceRating }}</label>
+            <input
+              v-model.number="serviceRating"
+              type="range"
+              min="1"
+              max="5"
+              step="0.1"
+            />
+          </div>
+
+          <div class="field">
+            <label>Ambiente {{ environmentRating }}</label>
+            <input
+              v-model.number="environmentRating"
+              type="range"
+              min="1"
+              max="5"
+              step="0.1"
+            />
+          </div>
         </section>
 
         <p v-if="error" class="error">
@@ -149,6 +170,8 @@ const recommendationRating = ref(4.5);
 const priceRating = ref(4.5);
 const flavorRating = ref(4.5);
 const presentationRating = ref(4.5);
+const serviceRating = ref(4.5);
+const environmentRating = ref(4.5);
 
 const loading = ref(false);
 const error = ref("");
@@ -220,6 +243,8 @@ async function handleSubmit() {
       priceRating: priceRating.value,
       flavorRating: flavorRating.value,
       presentationRating: presentationRating.value,
+      serviceRating: serviceRating.value,
+      environmentRating: environmentRating.value,
       medias: [
         {
           mediaUrl: uploaded.url,

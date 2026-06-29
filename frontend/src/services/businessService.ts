@@ -127,3 +127,11 @@ export async function getBusinessFollowers(businessId: string) {
 
   return response.data;
 }
+/*
+  Verifica se o usuário logado já segue um restaurante.
+*/
+export async function getBusinessFollowStatus(businessId: string) {
+  const response = await api.get(`/businesses/${businessId}/follow-status`);
+
+  return response.data;
+}

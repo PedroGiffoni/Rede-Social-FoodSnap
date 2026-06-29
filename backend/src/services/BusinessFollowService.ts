@@ -125,4 +125,28 @@ export class BusinessFollowService {
 
     return this.businessFollowRepository.listFollowers(businessProfileId);
   }
+  /*
+  Verifica se o usuário logado já segue um restaurante.
+
+  Usado na página pública do restaurante para manter
+  o botão "Seguir/Seguindo" correto mesmo após recarregar a página.
+*/
+  async checkIfUserFollowsBusiness(userId: string, businessProfileId: string) {
+    if (!userId) {
+      throw new Error("Usuário não autenticado.");
+    }
+
+    if (!businessProfileId) {
+      throw new Error("ID do restaurante é obrigatório.");
+    }
+
+    const follow = await this.businessFollowRepository.find(
+      userId,
+      businessProfileId,
+    );
+
+    return {
+      following: !!follow,
+    };
+  }
 }
