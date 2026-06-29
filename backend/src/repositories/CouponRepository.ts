@@ -115,4 +115,40 @@ export class CouponRepository {
       },
     });
   }
+  /*
+  Atualiza dados de um cupom.
+*/
+  async update(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      code?: string;
+      discountType?: DiscountType;
+      discountValue?: number;
+      validUntil?: Date | null;
+      isActive?: boolean;
+    },
+  ) {
+    return prisma.coupon.update({
+      where: {
+        id,
+      },
+      data,
+      include: {
+        businessProfile: true,
+      },
+    });
+  }
+
+  /*
+  Exclui um cupom.
+*/
+  async delete(id: string) {
+    return prisma.coupon.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

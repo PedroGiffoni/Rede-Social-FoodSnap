@@ -37,3 +37,32 @@ export async function toggleCoupon(couponId: string) {
 
   return response.data;
 }
+
+/*
+  Edita um cupom existente.
+*/
+export async function updateCoupon(
+  couponId: string,
+  data: {
+    title: string;
+    description?: string;
+    code: string;
+    discountType: "PERCENTAGE" | "FIXED" | "FREE_ITEM";
+    discountValue?: number;
+    validUntil?: string;
+    isActive?: boolean;
+  },
+) {
+  const response = await api.patch(`/coupons/${couponId}`, data);
+
+  return response.data;
+}
+
+/*
+  Exclui um cupom existente.
+*/
+export async function deleteCoupon(couponId: string) {
+  const response = await api.delete(`/coupons/${couponId}`);
+
+  return response.data;
+}

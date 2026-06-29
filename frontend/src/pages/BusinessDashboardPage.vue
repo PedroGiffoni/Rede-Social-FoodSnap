@@ -19,7 +19,10 @@
         <!-- Card superior com capa, logo e dados principais do restaurante -->
         <section class="business-cover">
           <!-- Imagem de capa do restaurante -->
-          <div class="cover-image">
+          <button
+            class="cover-image cover-clickable"
+            @click="showCoverModal = true"
+          >
             <img
               v-if="business.coverUrl"
               :src="business.coverUrl"
@@ -27,21 +30,15 @@
             />
 
             <span v-else>🍽️</span>
-          </div>
+          </button>
 
-          <!-- Botão para trocar capa -->
-          <div class="cover-actions">
-            <label class="image-button">
-              🖼️ Trocar capa
-
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                @change="handleCoverUpload"
-              />
-            </label>
-          </div>
+          <input
+            ref="coverInput"
+            type="file"
+            accept="image/*"
+            hidden
+            @change="handleCoverUpload"
+          />
 
           <!-- Cabeçalho com avatar e informações -->
           <div class="business-header">
@@ -122,15 +119,15 @@
             <span>Média</span>
           </div>
 
-          <div>
+          <button class="stat-button" @click="showCouponsModal = true">
             <strong>{{ coupons.length }}</strong>
             <span>Cupons</span>
-          </div>
+          </button>
 
-          <div>
+          <button class="stat-button" @click="openFollowersModal">
             <strong>{{ followersCount }}</strong>
             <span>Seguidores</span>
-          </div>
+          </button>
         </section>
 
         <!-- Ações principais do painel -->
@@ -139,10 +136,6 @@
 
           <button @click="showEditForm = !showEditForm">
             ✏️ Editar restaurante
-          </button>
-
-          <button @click="showCouponForm = !showCouponForm">
-            🎟️ Criar cupom
           </button>
         </section>
 
@@ -229,29 +222,6 @@
           </form>
         </section>
 
-        <!-- Lista de cupons já cadastrados -->
-        <section v-if="coupons.length" class="panel-card">
-          <h2>Cupons cadastrados</h2>
-
-          <article
-            v-for="coupon in coupons"
-            :key="coupon.id"
-            class="coupon-card"
-          >
-            <strong>{{ coupon.title }}</strong>
-
-            <p>{{ coupon.code }}</p>
-
-            <p v-if="coupon.description">
-              {{ coupon.description }}
-            </p>
-
-            <button @click="toggleCouponStatus(coupon.id)">
-              {{ coupon.isActive ? "Desativar" : "Ativar" }}
-            </button>
-          </article>
-        </section>
-
         <!-- Galeria horizontal com imagens das postagens do restaurante -->
         <section v-if="galleryPosts.length" class="gallery-section">
           <h2>Galeria</h2>
@@ -311,7 +281,120 @@
             </button>
           </div>
         </section>
+        <section
+          v-if="showCoverModal"
+          class="modal-overlay"
+          @click.self="showCoverModal = false"
+        >
+          <div class="avatar-modal">
+            <h2>Alterar capa</h2>
+
+            <button class="modal-option upload" @click="openCoverFilePicker">
+              Carregar foto
+            </button>
+
+            <button class="modal-option remove" @click="handleRemoveCover">
+              Excluir foto atual
+            </button>
+
+            <button class="modal-option cancel" @click="showCoverModal = false">
+              Cancelar
+            </button>
+          </div>
+        </section>
       </template>
+      <section
+        v-if="showCouponsModal"
+        class="modal-overlay"
+        @click.self="showCouponsModal = false"
+      >
+        <div class="coupons-modal">
+          <header class="modal-header">
+            <h2>Cupons</h2>
+            <button @click="showCouponsModal = false">✕</button>
+          </header>
+
+          <section class="modal-actions">
+            <button @click="startCreateCoupon">🎟️ Criar cupom</button>
+          </section>
+
+          <section v-if="coupons.length === 0" class="modal-status">
+            Nenhum cupom cadastrado.
+          </section>
+
+          <section v-else>
+            <article
+              v-for="coupon in coupons"
+              :key="coupon.id"
+              class="modal-coupon-card"
+            >
+              <strong>{{ coupon.title }}</strong>
+              <p>{{ coupon.code }}</p>
+              <p v-if="coupon.description">{{ coupon.description }}</p>
+
+              <div class="coupon-modal-actions">
+                <button @click="startEditCoupon(coupon)">✏️ Editar</button>
+                <button @click="toggleCouponStatus(coupon.id)">
+                  {{ coupon.isActive ? "Desativar" : "Ativar" }}
+                </button>
+                <button
+                  class="danger-button"
+                  @click="handleDeleteCoupon(coupon.id)"
+                >
+                  🗑️ Excluir
+                </button>
+              </div>
+            </article>
+          </section>
+        </div>
+      </section>
+      <section
+        v-if="showFollowersModal"
+        class="modal-overlay"
+        @click.self="showFollowersModal = false"
+      >
+        <div class="users-modal">
+          <header class="modal-header">
+            <h2>Seguidores</h2>
+
+            <button @click="showFollowersModal = false">✕</button>
+          </header>
+
+          <section v-if="loadingFollowers" class="modal-status">
+            Carregando seguidores...
+          </section>
+
+          <section v-else-if="followers.length === 0" class="modal-status">
+            Este restaurante ainda não possui seguidores.
+          </section>
+
+          <section v-else>
+            <article
+              v-for="user in followers"
+              :key="user.id"
+              class="modal-user-card"
+              @click="goToUser(user.id)"
+            >
+              <div class="modal-avatar">
+                <img
+                  v-if="user.avatarUrl"
+                  :src="user.avatarUrl"
+                  :alt="user.name"
+                />
+
+                <span v-else>
+                  {{ user.name.charAt(0).toUpperCase() }}
+                </span>
+              </div>
+
+              <div>
+                <strong>{{ user.name }}</strong>
+                <p>@{{ makeUsername(user.name) }}</p>
+              </div>
+            </article>
+          </section>
+        </div>
+      </section>
     </main>
   </MainLayout>
 </template>
@@ -330,10 +413,16 @@ import {
   updateBusinessImages,
   updateMyBusiness,
   getBusinessFollowersCount,
+  getBusinessFollowers,
 } from "../services/businessService";
 
 import { uploadFile } from "../services/uploadService";
-import { createCoupon, toggleCoupon } from "../services/couponService";
+import {
+  createCoupon,
+  toggleCoupon,
+  updateCoupon,
+  deleteCoupon,
+} from "../services/couponService";
 
 import type { BusinessProfile, Coupon } from "../types/Business";
 import type { Post } from "../types/Post";
@@ -356,6 +445,17 @@ const business = ref<BusinessProfile | null>(null);
 const posts = ref<Post[]>([]);
 const coupons = ref<Coupon[]>([]);
 const followersCount = ref(0);
+/*
+  Lista de seguidores do restaurante.
+
+  Usada na popup de seguidores.
+*/
+const followers = ref<any[]>([]);
+
+/*
+  Controla se a lista de seguidores está carregando.
+*/
+const loadingFollowers = ref(false);
 
 /*
   Controlam abertura e fechamento dos formulários.
@@ -369,16 +469,33 @@ const showCouponForm = ref(false);
 const showAvatarModal = ref(false);
 
 /*
+  Controla a popup de cupons.
+*/
+const showCouponsModal = ref(false);
+
+/*
+  Controla a popup de seguidores.
+*/
+const showFollowersModal = ref(false);
+/*
   Referência para o input escondido de upload da foto.
 */
 const avatarInput = ref<HTMLInputElement | null>(null);
 
+/*
+  troca de foto da capa do restaurante.
+*/
+const showCoverModal = ref(false);
+const coverInput = ref<HTMLInputElement | null>(null);
 /*
   Campos do formulário de cupom.
 */
 const couponTitle = ref("");
 const couponDescription = ref("");
 const couponCode = ref("");
+const editingCouponId = ref("");
+const editingCoupon = ref(false);
+const deletingCoupon = ref(false);
 
 const couponDiscountType = ref<"PERCENTAGE" | "FIXED" | "FREE_ITEM">(
   "PERCENTAGE",
@@ -464,6 +581,36 @@ async function loadDashboard() {
     error.value = "Erro ao carregar painel do restaurante.";
   } finally {
     loading.value = false;
+  }
+}
+
+/*
+  Ptroca de foto do restaurante
+.
+*/
+
+function openCoverFilePicker() {
+  coverInput.value?.click();
+}
+
+async function handleRemoveCover() {
+  try {
+    if (!business.value) {
+      return;
+    }
+
+    const updated = await updateBusinessImages({
+      coverUrl: "",
+    });
+
+    business.value = {
+      ...business.value,
+      coverUrl: updated.coverUrl,
+    };
+
+    showCoverModal.value = false;
+  } catch {
+    alert("Erro ao remover capa.");
   }
 }
 
@@ -624,6 +771,7 @@ async function handleCoverUpload(event: Event) {
   } finally {
     uploadingCover.value = false;
   }
+  showCoverModal.value = false;
 }
 
 /*
@@ -671,7 +819,31 @@ async function handleCreateCoupon() {
     }
 
     savingCoupon.value = true;
+    if (editingCoupon.value) {
+      const updated = await updateCoupon(editingCouponId.value, {
+        title: couponTitle.value,
+        description: couponDescription.value,
+        code: couponCode.value,
+        discountType: couponDiscountType.value,
+        discountValue: couponDiscountValue.value,
+        validUntil: couponValidUntil.value || undefined,
+        isActive: true,
+      });
 
+      const index = coupons.value.findIndex(
+        (coupon) => coupon.id === updated.id,
+      );
+
+      if (index >= 0) {
+        coupons.value[index] = updated;
+      }
+
+      editingCoupon.value = false;
+      editingCouponId.value = "";
+      showCouponForm.value = false;
+
+      return;
+    }
     const coupon = await createCoupon({
       businessProfileId: business.value.id,
       title: couponTitle.value,
@@ -715,6 +887,102 @@ async function toggleCouponStatus(couponId: string) {
   } catch {
     alert("Erro ao atualizar cupom.");
   }
+}
+function startCreateCoupon() {
+  editingCoupon.value = false;
+  editingCouponId.value = "";
+
+  couponTitle.value = "";
+  couponDescription.value = "";
+  couponCode.value = "";
+  couponDiscountType.value = "PERCENTAGE";
+  couponDiscountValue.value = undefined;
+  couponValidUntil.value = "";
+
+  showCouponsModal.value = false;
+  showCouponForm.value = true;
+}
+
+function startEditCoupon(coupon: Coupon) {
+  editingCoupon.value = true;
+  editingCouponId.value = coupon.id;
+
+  couponTitle.value = coupon.title;
+  couponDescription.value = coupon.description || "";
+  couponCode.value = coupon.code;
+  couponDiscountType.value = coupon.discountType;
+  couponDiscountValue.value = coupon.discountValue
+    ? Number(coupon.discountValue)
+    : undefined;
+
+  couponValidUntil.value = coupon.validUntil
+    ? String(coupon.validUntil).slice(0, 10)
+    : "";
+
+  showCouponsModal.value = false;
+  showCouponForm.value = true;
+}
+
+async function handleDeleteCoupon(couponId: string) {
+  const confirmed = window.confirm("Deseja realmente excluir este cupom?");
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    deletingCoupon.value = true;
+
+    await deleteCoupon(couponId);
+
+    coupons.value = coupons.value.filter((coupon) => coupon.id !== couponId);
+  } catch {
+    alert("Erro ao excluir cupom.");
+  } finally {
+    deletingCoupon.value = false;
+  }
+}
+/*
+  Abre a popup de seguidores e busca a lista no backend.
+*/
+async function openFollowersModal() {
+  if (!business.value) {
+    return;
+  }
+
+  try {
+    loadingFollowers.value = true;
+    showFollowersModal.value = true;
+
+    const data = await getBusinessFollowers(business.value.id);
+
+    followers.value = data.map((item: any) => {
+      return item.user || item.follower || item;
+    });
+  } catch {
+    alert("Erro ao carregar seguidores.");
+  } finally {
+    loadingFollowers.value = false;
+  }
+}
+
+/*
+  Cria username visual a partir do nome.
+*/
+function makeUsername(name: string) {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "");
+}
+
+/*
+  Abre o perfil público do usuário.
+*/
+function goToUser(userId: string) {
+  showFollowersModal.value = false;
+  router.push(`/usuarios/${userId}`);
 }
 
 /*
@@ -1065,5 +1333,155 @@ h2 {
 
 .website-link:hover {
   text-decoration: underline;
+}
+.cover-clickable {
+  width: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.cover-clickable:hover {
+  opacity: 0.9;
+}
+
+.coupons-modal {
+  width: min(560px, calc(100% - 32px));
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #26272d;
+  border-radius: 18px;
+  color: white;
+}
+
+.modal-header {
+  padding: 18px;
+  border-bottom: 1px solid #3a3b41;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header button {
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  padding: 14px 18px;
+  border-bottom: 1px solid #3a3b41;
+}
+
+.modal-actions button {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #ff6b35;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-status {
+  padding: 20px;
+  text-align: center;
+  color: #bbb;
+}
+
+.modal-coupon-card {
+  padding: 16px 18px;
+  border-bottom: 1px solid #3a3b41;
+}
+
+.modal-coupon-card p {
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.coupon-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.coupon-modal-actions button {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  background: #ff6b35;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.coupon-modal-actions .danger-button {
+  background: #ff4d62;
+}
+
+.stat-button {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-button:hover {
+  background: #fff3ed;
+}
+.users-modal {
+  width: min(560px, calc(100% - 32px));
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #26272d;
+  border-radius: 18px;
+  color: white;
+}
+
+.modal-user-card {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #3a3b41;
+}
+
+.modal-user-card:hover {
+  background: #32333a;
+}
+
+.modal-avatar {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ff6b35;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.modal-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-user-card p {
+  color: #bbb;
+  font-size: 14px;
 }
 </style>

@@ -47,5 +47,17 @@ couponRoutes.patch(
   authMiddleware,
   couponController.toggle,
 );
+/*
+  PATCH /coupons/:couponId
 
+  Edita um cupom.
+*/
+couponRoutes.patch("/:couponId", authMiddleware, couponController.update);
+
+/*
+  DELETE /coupons/:couponId
+
+  Exclui um cupom.
+*/
+couponRoutes.delete("/:couponId", authMiddleware, couponController.delete);
 export { couponRoutes };
