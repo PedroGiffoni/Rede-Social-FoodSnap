@@ -5,7 +5,7 @@
 ### Rede Social para apaixonados por gastronomia
 
 🌐 **Acesse a aplicação:**  
-## https://rede-social-foodsnap.vercel.app
+## [https://rede-social-foodsnap.vercel.app](https://rede-social-food-snap.vercel.app)
 
 Compartilhe experiências, descubra novos restaurantes, publique fotos e vídeos, acompanhe estabelecimentos e encontre os melhores lugares para comer.
 
