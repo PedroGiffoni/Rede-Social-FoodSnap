@@ -1,10 +1,11 @@
-# 🍔 FoodSnap
-
 <div align="center">
 
-# FoodSnap
+# 🍔 FoodSnap
 
 ### Rede Social para apaixonados por gastronomia
+
+🌐 **Acesse a aplicação:**  
+## https://rede-social-foodsnap.vercel.app
 
 Compartilhe experiências, descubra novos restaurantes, publique fotos e vídeos, acompanhe estabelecimentos e encontre os melhores lugares para comer.
 
