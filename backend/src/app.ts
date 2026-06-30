@@ -26,10 +26,15 @@ import { savedRoutes } from "./routes/savedRoutes";
 
 const app = express();
 
-/*
-  CORS permite que o frontend em Vue.js consiga consumir esta API.
-*/
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://rede-social-foodsnap-git-v3-pedro-giffonis-projects.vercel.app",
+    ],
+    credentials: true,
+  }),
+);
 
 /*
   Esta configuração permite que o Express leia requisições em JSON.
