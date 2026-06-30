@@ -1,5 +1,5 @@
 import { prisma } from "../database/prisma";
-import { MediaType, PostType, UserType } from "@prisma/client";
+import { MediaType, PostType, UserType, Prisma } from "@prisma/client";
 
 /*
   PostRepository
@@ -68,7 +68,7 @@ export class PostRepository {
 
     Isso facilita o frontend, porque o card do post já vem completo.
   */
-  private defaultInclude = {
+  private defaultInclude: Prisma.PostInclude = {
     author: {
       select: {
         id: true,
