@@ -30,7 +30,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://rede-social-foodsnap-git-v3-pedro-giffonis-projects.vercel.app",
+      "https://rede-social-food-snap-git-v3-pedro-giffoni-s-projects.vercel.app",
     ],
     credentials: true,
   }),
