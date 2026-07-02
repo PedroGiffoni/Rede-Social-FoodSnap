@@ -4,6 +4,10 @@
 
 ### Rede Social para apaixonados por gastronomia
 
+🌐 **Acesse o Pitch de apresentação**  
+## [https://drive.google.com/file/d/1ieHZHSv0g6_0I2NcQM_40H4uAzmlNug2/view?usp=sharing](https://drive.google.com/file/d/1ieHZHSv0g6_0I2NcQM_40H4uAzmlNug2/view?usp=sharing)
+https://drive.google.com/file/d/1ieHZHSv0g6_0I2NcQM_40H4uAzmlNug2/view?usp=sharing
+
 🌐 **Acesse a aplicação:**  
 ## [https://rede-social-foodsnap.vercel.app](https://rede-social-food-snap.vercel.app)
 
